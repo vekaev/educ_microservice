@@ -9,7 +9,7 @@ const CommentCreate = ({ postId }) => {
 		e.preventDefault();
 
 		try {
-			await axios.post(`http://localhost:4001/posts/${postId}/comments`, {  content })
+			await axios.post(`http://my-proxy.com/posts/${postId}/comments`, {  content })
 
 			setContent('')
 		} catch (error) {
