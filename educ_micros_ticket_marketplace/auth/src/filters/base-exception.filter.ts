@@ -16,7 +16,7 @@ export default class BaseExceptionFilter<T extends Error> implements ExceptionFi
     //     const error = new NotFoundError(err.message)
     //     res.status(error.statusCode).send({ errors: error.serializeErrors() })
     // }
-    console.log(err)
+    console.log(err.message)
 
     res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR).send({ errors: [{ message: err.message }] });
   }

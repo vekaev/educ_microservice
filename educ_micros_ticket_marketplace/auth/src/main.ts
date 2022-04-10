@@ -1,17 +1,31 @@
 import { NestFactory } from '@nestjs/core';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import * as session from 'cookie-session';
+import * as passport from 'passport';
+
 import { AppModule } from './app.module';
 import { exceptionFactory } from './utils';
 
 (async () => {
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const configService = app.get(ConfigService);
 
   app.setGlobalPrefix('/api');
-  app.useGlobalPipes(new ValidationPipe({ exceptionFactory }))
+  app.set('trust proxy', 1);
 
-  await app.listen(process.env.PORT || 3000, process.env.HOST || '0.0.0.0');
+  app.useGlobalPipes(new ValidationPipe({ exceptionFactory, transform: true }));
+
+  app.use(
+    session({
+      secret: configService.get('SESSION_SECRET'),
+      cookie: { signed: false, secure: true },
+    }),
+  );
+
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  await app.listen(configService.get('PORT'));
 })();
